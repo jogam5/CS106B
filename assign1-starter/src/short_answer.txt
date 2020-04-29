@@ -1,0 +1,72 @@
+Before submitting this file, make sure that there are no more TODO
+values left in the file (besides the one in this introduction of course).
+
+Perfect Numbers
+---------------
+Q1: Input Size and Runtime for Brute Force Search
+A1:
+Input Size: 40000 	Runtime: TODO
+Input Size: 80000	Runtime: TODO
+Input Size: 160000	Runtime: TODO
+Input Size: 320000	Runtime: TODO
+Input Size: 640000	Runtime: TODO
+
+(optional) Plot these values on a graph of runtime vs. input size and 
+see if you can find a trend in the graph.
+
+
+Q2:  What is it about the algorithm that causes it take more time to 
+test larger numbers than to test smaller numbers?
+A2: TODO
+
+
+Q3: Make a prediction of how long it would take the brute force algorithm
+to reach the 5th perfect number.
+A3: TODO
+
+
+Q4: Introduce a bug into the divisorSum function. Do any of the tests still
+pass even with this broken function? Why or why not?
+A4: TODO
+
+
+Q5: Can the test framework detect that the test case is bogus?
+A5: TODO
+
+
+Q6: Describe your testing strategy to determine that `smarterSum` was working
+as expected.
+A6: TODO
+
+
+Q7: Input Size and Runtime for Smarter Search
+A7:
+Input Size: 40000 	Runtime: TODO
+Input Size: 80000	Runtime: TODO
+Input Size: 160000	Runtime: TODO
+Input Size: 320000	Runtime: TODO
+Input Size: 640000	Runtime: TODO
+
+(optional) Plot these values on a graph of runtime vs. input size and 
+see if you can find a trend in the graph.
+
+
+Q8: How long will the optimized code take to reach the fifth perfect number? 
+A8: TODO
+
+
+Q9: What test cases did you use to verify that your new function works correctly?
+Please give a brief description of your testing strategy.
+A9: TODO
+
+
+Soundex
+-------
+Q10: What is the Soundex code for "Bowman"? What is the Soundex code for your own surname?
+A10: TODO
+
+
+Q11: Please describe your general decomposition strategy for implementing 
+the Soundex code generastion algorithm. 
+A11: TODO
+

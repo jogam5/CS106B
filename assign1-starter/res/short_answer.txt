@@ -1,0 +1,17 @@
+Q11. Decomposition strategy
+    1. Define tests for the Soundex algorithm
+    2. Write the Soundex algorithm
+        2.1 Helper to remove non-letter characters
+        2.2 Store first letter of surname in a simple character
+        2.3 Helper to match remaining letters to numbers
+        2.4 Helper to perfomr steps 4 -6
+    3. If tests pass, follow the 6 provided steps
+
+Q11. Decomposition
+Helpers:
+1. Write function that discards all non-letter characters, OK
+2. Write an encoding function following the table codes, OK
+3. Write a function that coalesces duplicate digits, OK
+4. Write a function that removes all zeros from code, OK
+5. Write a function that makes the code's length exactly 4 digits, OK
+
