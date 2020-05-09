@@ -1,0 +1,43 @@
+Before submitting this file, make sure that there are no more TODO
+values left in the file (besides the one in this introduction of course).
+
+Warmup and Debugging Exercise
+-----------------------------
+Q1. Is the first queue element displayed in debugger pane (element [0]) the element at front of queue or the back?  Is the first stack element displayed on the top of stack or the bottom?
+A1: The front element. At the bottom.
+
+
+Q2: What must be true about the input to `stutterNegative` for it to produce correct output?
+A2: The input should either receive a parameter containing the size of the queue or the size of the queue must be stored
+in a variable before entering the foor loop, so that the size of the original queue doesn't grow provoking a bug.
+Up to this point whenever a negative number is enterered, the bug will appear.
+
+
+Q3: For which type of inputs does `stutterNegative` go into an infinite loop?
+A3: When the queue contains only negative numbers, an infinite loop happens.
+
+
+Q4. What is the bug within `stutterNegative` that causes it to get stuck in a loop?
+A4: The size of the queue grows instead of remaining constant, therefore a variable must store the original queue size before
+entering the loop.
+
+
+Q5: What is the state of the variables (as reported in the debugger variable pane) right before the removeMatchPair funciton crashes? What happens if you try to step over the line where the program crashes?
+A5: Before the crash, the method does indeed removed the key:value pair that fulfilled the IF condition causing the bug, the program crashed immediately after that though. If steeping out the program an
+exception is triggered.
+
+
+Maze
+-------
+Q6. Describe the malformed maze files you created in order to verify the robustness of your maze reading.
+A6: TODO 
+
+Q7. After you have written your tests, describe your testing strategy to determine that your checkSolution works as intended.
+A7: TODO
+
+
+Search Engine
+-------------
+Q8: What would the sample inverted index for the tiny.txt file look like?
+A8: TODO
+
