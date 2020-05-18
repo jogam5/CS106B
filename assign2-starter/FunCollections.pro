@@ -290,3 +290,9 @@ BAD_CHARS ~= s|[a-zA-Z0-9_ .\/:+-]+|
 }
 
 # END OF FILE (this should be line #291; if not, your .pro has been changed!)
+
+DISTFILES += \
+    res/errorSize3x3.maze \
+    res/errorSize4x4.maze \
+    res/malformed_1.maze \
+    res/malformed_2.maze

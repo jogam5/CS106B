@@ -51,6 +51,14 @@ bool readMazeFile(string filename, Grid<bool>& maze)
     int numCols = lines[0].length();   // cols is length of line
     maze.resize(numRows, numCols);     // resize grid dimensions
 
+    /* Error detection # 2: Check for discrepancies in the length of rows */
+    for(int i = 0; i < lines.size(); i++) {
+        int rowLength = lines[0].length();
+        if ((int)lines[i].length() > rowLength || (int)lines[i].length() < rowLength ) {
+            error("One or more rows have a different length.");
+        }
+    }
+
     for (int r = 0; r < numRows; r++) {
         for (int c = 0; c < numCols; c++) {
             char ch = lines[r][c];
@@ -58,6 +66,9 @@ bool readMazeFile(string filename, Grid<bool>& maze)
                 maze[r][c] = false;
             } else if (ch == '-') { // corridor
                 maze[r][c] = true;
+            } else {
+                /* Error detection # 1: Check for characters different from expected*/
+                error("Invalid character for a maze.");
             }
         }
     }
@@ -104,6 +115,26 @@ PROVIDED_TEST("readMazeFile on malformed file should raise an error") {
     Grid<bool> g;
 
     EXPECT_ERROR(readMazeFile("res/malformed.maze", g));
+}
+
+STUDENT_TEST("readMazeFile on malformed file with blank spaces should raise an error") {
+    Grid<bool> g;
+    EXPECT_ERROR(readMazeFile("res/malformed_1.maze", g));
+}
+
+STUDENT_TEST("readMazeFile on malformed file with numbers should raise an error") {
+    Grid<bool> g;
+    EXPECT_ERROR(readMazeFile("res/malformed_2.maze", g));
+}
+
+STUDENT_TEST("readMazeFile on different row sizes should raise an error") {
+    Grid<bool> g;
+    EXPECT_ERROR(readMazeFile("res/errorSize3x3.maze", g));
+}
+
+STUDENT_TEST("readMazeFile on different row sizes should raise an error") {
+    Grid<bool> g;
+    EXPECT_ERROR(readMazeFile("res/errorSize4x4.maze", g));
 }
 
 PROVIDED_TEST("checkSolution on correct path") {

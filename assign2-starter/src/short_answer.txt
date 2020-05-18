@@ -30,7 +30,8 @@ exception is triggered.
 Maze
 -------
 Q6. Describe the malformed maze files you created in order to verify the robustness of your maze reading.
-A6: TODO 
+A6: I created files with blank spaces and numbers to check for the case of raising an error if characters different from the expected ones
+where given. I also tested for the case when the length of one or more rows is not equal.
 
 Q7. After you have written your tests, describe your testing strategy to determine that your checkSolution works as intended.
 A7: TODO
