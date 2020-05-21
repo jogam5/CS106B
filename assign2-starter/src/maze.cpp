@@ -18,15 +18,78 @@ using namespace std;
 // behavior of the function and how you implemented this behavior
 bool checkSolution(Grid<bool>& g, Stack<GridLocation> path)
 {
-    GridLocation exit = {g.numRows()-1,  g.numCols()-1};
+    Stack<GridLocation> pathCopy = path;
+    // peek() -  look at the entity at the top of the stack, but don’t remove it
 
-    if (path.peek() != exit) {
-        error("path does not end at exit");
-    }
     // TODO: check rest of path is valid (see writeup)
     // if find a problem, call error() to report
     // if all checks out, return true
-    return true;
+
+    // 1. Path must start at the upper left corner
+    // validEntryPath
+    GridLocation startMaze = {0, 0};
+    GridLocation startPath;
+    while(!pathCopy.isEmpty()) {
+        startPath = pathCopy.pop();
+    }
+    if (startPath != startMaze) {
+        error("path does not start at the upper left corner");
+    }
+
+    // 2. Path must end at the lower right coerner
+    // validExitPath
+    GridLocation exit = {g.numRows()-1,  g.numCols()-1};
+    if (path.peek() != exit) {
+        error("path does not end at exit");
+    }
+    // 3. Each location in the path is within maze bounds
+    // isWithinBounds
+    int xBound = g.numRows()-1;
+    int yBound = g.numCols()-1;
+    pathCopy = path;
+    while(!pathCopy.isEmpty()){
+        GridLocation location = pathCopy.pop();
+        if (location.row > xBound || location.col > yBound) {
+            error("path is beyond the bounds of the maze");
+        } else if (location.row < 0 || location.col < 0) {
+            error("path is beyond the bounds of the maze");
+        }
+    }
+
+    // 4. Each location in the path is an open corridor
+    // isCorridor
+    pathCopy = path;
+    while(!pathCopy.isEmpty()) {
+        GridLocation location = pathCopy.pop();
+            if (!g[location]) {
+                error("paths is not an open corridor");
+            }
+    }
+    // 5. Each location is one cardinal step (N,S,E,W) from the next in path
+    // isCardinalStep
+    pathCopy = path;
+    while(!pathCopy.isEmpty()) {
+        GridLocation currentLocation = pathCopy.pop();
+        if (!pathCopy.isEmpty()) {
+            GridLocation nextLocation = pathCopy.peek();
+            if ( abs(currentLocation.row - nextLocation.row) > 1 || abs(currentLocation.col - nextLocation.col) > 1 ) {
+                error("the location is more than one cardinal steps from the next one");
+            }
+         }
+    }
+    // 6. The path contains no loops
+    // hasNoLoops
+    pathCopy = path;
+    while(!pathCopy.isEmpty()) {
+        GridLocation currentLocation = pathCopy.pop();
+        if(!pathCopy.isEmpty()) {
+            GridLocation nextLocation = pathCopy.peek();
+            if ( nextLocation.row > currentLocation.row || nextLocation.col > currentLocation.col) {
+                error("The path contains loops: a location appears more than once");
+            }
+        }
+    }
+    return true;    
 }
 
 /*
@@ -89,7 +152,72 @@ Stack<GridLocation> solveMaze(Grid<bool>& maze)
     return p;
 }
 
+/* * * * * * Student Test Cases For checkSolution* * * * * */
+STUDENT_TEST("Raise error: Path must start at the upper left corner") {
+    Grid<bool> g = {{true, false}, {true, true}};
+    Stack<GridLocation> not_begin_at_entry = { {1, 0}, {1, 1} };
+    EXPECT_ERROR(checkSolution(g, not_begin_at_entry));
+}
 
+STUDENT_TEST("Raise error: Path must start at the upper left corner") {
+    Grid<bool> g = {{true, false, false}, {true, true, false}, {true, true, true}};
+    Stack<GridLocation> not_begin_at_entry = { {0, 1}, {1, 0}, {2, 0}, {2, 1}, {2, 2}};
+    EXPECT_ERROR(checkSolution(g, not_begin_at_entry));
+}
+
+STUDENT_TEST("checkSolution on correct path") {
+    Grid<bool> g = {{true, false, false}, {true, true, false}, {true, true, true}};
+    Stack<GridLocation> soln = { {0, 0}, {1, 0}, {2, 0}, {2, 1}, {2, 2}};
+    EXPECT(checkSolution(g, soln));
+}
+
+STUDENT_TEST("Raise error: Path must be within bounds") {
+    Grid<bool> g = {{true, false, false}, {true, true, false}, {true, true, true}};
+    Stack<GridLocation> soln = { {0, 0}, {1, 0}, {5, 0}, {2, 1}, {2, 2}};
+    EXPECT_ERROR(checkSolution(g, soln));
+}
+
+STUDENT_TEST("Raise error: Path must be within bounds") {
+    Grid<bool> g = {{true, false, false}, {true, true, false}, {true, true, true}};
+    Stack<GridLocation> soln = { {0, 0}, {-10, 0}, {1, 0}, {2, 1}, {2, 2}};
+    EXPECT_ERROR(checkSolution(g, soln));
+}
+
+STUDENT_TEST("Raise error: Location in the path isn't an open corridor") {
+    Grid<bool> g = {{true, false, false}, {false, true, false}, {true, true, true}};
+    Stack<GridLocation> soln = { {0, 0}, {1, 0}, {2, 0}, {2, 1}, {2, 2}};
+    EXPECT_ERROR(checkSolution(g, soln));
+}
+
+STUDENT_TEST("The path contains only open corridors") {
+    Grid<bool> g = {{true, false, false}, {true, true, false}, {true, true, true}};
+    Stack<GridLocation> soln = { {0, 0}, {1, 0}, {2, 0}, {2, 1}, {2, 2}};
+    EXPECT(checkSolution(g, soln));
+}
+
+STUDENT_TEST("Raise error: A location in the path is more than one cardinal step ") {
+    Grid<bool> g = {{true, false, false}, {false, true, false}, {true, true, true}};
+    Stack<GridLocation> soln = { {0, 0}, {2, 0}, {2, 0}, {2, 1}, {2, 2}};
+    EXPECT_ERROR(checkSolution(g, soln));
+}
+
+STUDENT_TEST("Raise error: A location in the path is more than one cardinal step ") {
+    Grid<bool> g = {{true, false, false}, {false, true, false}, {true, true, true}};
+    Stack<GridLocation> soln = { {0, 0}, {1, 0}, {2, 0}, {2, 2}, {2, 2}};
+    EXPECT_ERROR(checkSolution(g, soln));
+}
+
+STUDENT_TEST("Each location in the path is one cardinal step from the next in the path") {
+    Grid<bool> g = {{true, false, false}, {true, true, false}, {true, true, true}};
+    Stack<GridLocation> soln = { {0, 0}, {1, 0}, {2, 0}, {2, 1}, {2, 2}};
+    EXPECT(checkSolution(g, soln));
+}
+
+STUDENT_TEST("Raise error: The path contains loops") {
+    Grid<bool> g = {{true, false, false}, {false, true, false}, {true, true, true}};
+    Stack<GridLocation> soln = { {0, 0}, {1, 0}, {0,0}, {1,0}, {2, 0}, {2, 2}, {2, 2}};
+    EXPECT_ERROR(checkSolution(g, soln));
+}
 
 /* * * * * * Test Cases * * * * * */
 
