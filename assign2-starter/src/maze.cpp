@@ -8,6 +8,7 @@
 #include "filelib.h"
 #include "grid.h"
 #include "stack.h"
+#include "queue.h"
 #include "vector.h"
 #include "maze.h"
 #include "mazegraphics.h"
@@ -67,12 +68,17 @@ bool checkSolution(Grid<bool>& g, Stack<GridLocation> path)
     }
     // 5. Each location is one cardinal step (N,S,E,W) from the next in path
     // isCardinalStep
+    //Stack<GridLocation> teleport = { {0 ,0}, {1, 1} };
     pathCopy = path;
     while(!pathCopy.isEmpty()) {
+        // a. check for diagonals
+        // b. enforce vertical and horizontal movements
         GridLocation currentLocation = pathCopy.pop();
         if (!pathCopy.isEmpty()) {
             GridLocation nextLocation = pathCopy.peek();
-            if ( abs(currentLocation.row - nextLocation.row) > 1 || abs(currentLocation.col - nextLocation.col) > 1 ) {
+            int deltaX = currentLocation.row - nextLocation.row;
+            int deltaY = currentLocation.col - nextLocation.col;
+            if (deltaX + deltaY != 1) {
                 error("the location is more than one cardinal steps from the next one");
             }
          }
@@ -149,6 +155,9 @@ Stack<GridLocation> solveMaze(Grid<bool>& maze)
 {
     Stack<GridLocation> p;
     // TODO: your code here
+    // 1. Create a queue of paths. A path is a stack of grid locations.
+    Queue<Stack<GridLocation>> path;
+    // 2. Create a length-one path containing just the entry location. Enqueue that path.
     return p;
 }
 

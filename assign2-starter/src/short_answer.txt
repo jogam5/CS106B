@@ -34,7 +34,8 @@ A6: I created files with blank spaces and numbers to check for the case of raisi
 where given. I also tested for the case when the length of one or more rows is not equal.
 
 Q7. After you have written your tests, describe your testing strategy to determine that your checkSolution works as intended.
-A7: TODO
+A7: I created a test for each one of the errors, each test at least addresses two cases where the program is expected to fail.
+In total I created ten different tests.
 
 
 Search Engine
