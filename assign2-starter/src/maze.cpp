@@ -149,6 +149,30 @@ bool readMazeFile(string filename, Grid<bool>& maze)
     return true; // else no solution; nothing more to check
  }
 
+
+// TODO: Add a function header comment here to explain the
+// behavior of the function and how you implemented this be
+// *******HERE**** TESTS
+bool isCorridor(Grid<bool>& g, GridLocation location) {
+    if (g[location]) {
+        return true;
+    }
+    return false;
+}
+
+// TODO: Add a function header comment here to explain the
+// behavior of the function and how you implemented this be
+bool isWithinBounds(Grid<bool>& g, GridLocation location) {
+    int xBound = g.numRows()-1;
+    int yBound = g.numCols()-1;
+    if (location.row > xBound || location.col > yBound) {
+        return false;
+    } else if (location.row < 0 || location.col < 0) {
+        return false;
+    }
+    return true;
+}
+
 // TODO: Add a function header comment here to explain the 
 // behavior of the function and how you implemented this behavior
 Stack<GridLocation> solveMaze(Grid<bool>& maze)
@@ -156,11 +180,90 @@ Stack<GridLocation> solveMaze(Grid<bool>& maze)
     Stack<GridLocation> p;
     // TODO: your code here
     // 1. Create a queue of paths. A path is a stack of grid locations.
-    Queue<Stack<GridLocation>> path;
+    Queue<Stack<GridLocation>> container;
+
     // 2. Create a length-one path containing just the entry location. Enqueue that path.
+    Stack<GridLocation> path = {{0, 0}};
+    container.enqueue(path);
+
+    // 3. Dequeue path from queue.
+    Stack<GridLocation> pathDeq = container.dequeue();
+
+    // 4. If this path ends at exit, this path is the solution!
+    GridLocation exit = {maze.numRows()-1,  maze.numCols()-1};
+    if (pathDeq.peek() == exit) {
+        return pathDeq;
+    } else {
+
+    // 5. a. For each viable neighbor of path end, make copy of path, extend by adding neighbor and enqueue it.
+    //    b. A location has up to four neighbors, one in each of the four cardinal directions. A neighbor location
+    //       is viable if it is within the maze bounds, the cell is an open corridor (not a wall), and it has not
+    //       yet been visit
+
+    // 5.1 Get candidates
+        Stack<GridLocation> candidates;
+        GridLocation current = pathDeq.peek();
+        int xCurrent = current.row;
+        int yCurrent = current.col;
+        // Candidates
+        GridLocation up = {xCurrent-1, yCurrent};
+        candidates.push(up);
+        GridLocation right = {xCurrent, yCurrent+1};
+        candidates.push(right);
+        GridLocation down = {xCurrent+1, yCurrent};
+        candidates.push(down);
+        GridLocation left = {xCurrent, yCurrent-1};
+        candidates.push(left);
+    // 5.2 Check bounds
+        Stack<GridLocation> newCandidates;
+        while(!candidates.isEmpty()) {
+            GridLocation location = candidates.pop();
+            if (isWithinBounds(maze, location)) {
+                newCandidates.push(location);
+            }
+        }
+    // 5.3 Check open corridor
+
+    // 5.4 Check not loop
+    // 5.5 Enqueue it if viable
+    }
+
+
+
+
     return p;
 }
 
+
+
+/* * * * * * Student Test Cases For checkSolution* * * * * */
+STUDENT_TEST("is WithinBounds at corner location") {
+    Grid<bool> g = {{true, false}, {true, true}};
+    GridLocation up = {-1, 0};
+    GridLocation right = {0, 1};
+    GridLocation down = {1, 0};
+    GridLocation left = {0, -1};
+
+    EXPECT_EQUAL(false, isWithinBounds(g, up));
+    EXPECT_EQUAL(true, isWithinBounds(g, right));
+    EXPECT_EQUAL(true, isWithinBounds(g, down));
+    EXPECT_EQUAL(false, isWithinBounds(g, left));
+}
+
+STUDENT_TEST("is WithinBounds at center location") {
+    Grid<bool> g = {{true, false, true}, {true, true, false}, {false, true, true}};
+    int x = 1;
+    int y = 1;
+    GridLocation up = {x-1, y+0};
+    GridLocation right = {x+0, y+1};
+    GridLocation down = {x+1, y+0};
+    GridLocation left = {x+0, y-1};
+
+    EXPECT_EQUAL(true, isWithinBounds(g, up));
+    EXPECT_EQUAL(true, isWithinBounds(g, right));
+    EXPECT_EQUAL(true, isWithinBounds(g, down));
+    EXPECT_EQUAL(true, isWithinBounds(g, left));
+}
 /* * * * * * Student Test Cases For checkSolution* * * * * */
 STUDENT_TEST("Raise error: Path must start at the upper left corner") {
     Grid<bool> g = {{true, false}, {true, true}};
