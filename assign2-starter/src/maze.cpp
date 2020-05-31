@@ -9,19 +9,23 @@
 #include "grid.h"
 #include "stack.h"
 #include "queue.h"
+#include "set.h"
 #include "vector.h"
 #include "maze.h"
 #include "mazegraphics.h"
 #include "testing/SimpleTest.h"
+#include <chrono>
+#include <thread>
 using namespace std;
 
-// TODO: Add a function header comment here to explain the 
-// behavior of the function and how you implemented this behavior
+// This function reads in a Grid and a Stack, the former representing
+// the maze and the latter the path to solve the maze. The goal of the
+// function is to probe that the path follows certain rules so that
+// the given path solves the maze
+
 bool checkSolution(Grid<bool>& g, Stack<GridLocation> path)
 {
     Stack<GridLocation> pathCopy = path;
-    // peek() -  look at the entity at the top of the stack, but don’t remove it
-
     // TODO: check rest of path is valid (see writeup)
     // if find a problem, call error() to report
     // if all checks out, return true
@@ -70,14 +74,16 @@ bool checkSolution(Grid<bool>& g, Stack<GridLocation> path)
     // isCardinalStep
     //Stack<GridLocation> teleport = { {0 ,0}, {1, 1} };
     pathCopy = path;
+    cout << "sln:" << endl;
+    cout << path << endl;
     while(!pathCopy.isEmpty()) {
         // a. check for diagonals
         // b. enforce vertical and horizontal movements
         GridLocation currentLocation = pathCopy.pop();
         if (!pathCopy.isEmpty()) {
             GridLocation nextLocation = pathCopy.peek();
-            int deltaX = currentLocation.row - nextLocation.row;
-            int deltaY = currentLocation.col - nextLocation.col;
+            int deltaX = abs(currentLocation.row - nextLocation.row);
+            int deltaY = abs(currentLocation.col - nextLocation.col);
             if (deltaX + deltaY != 1) {
                 error("the location is more than one cardinal steps from the next one");
             }
@@ -86,13 +92,13 @@ bool checkSolution(Grid<bool>& g, Stack<GridLocation> path)
     // 6. The path contains no loops
     // hasNoLoops
     pathCopy = path;
+    Set<GridLocation> set;
     while(!pathCopy.isEmpty()) {
-        GridLocation currentLocation = pathCopy.pop();
-        if(!pathCopy.isEmpty()) {
-            GridLocation nextLocation = pathCopy.peek();
-            if ( nextLocation.row > currentLocation.row || nextLocation.col > currentLocation.col) {
-                error("The path contains loops: a location appears more than once");
-            }
+        GridLocation location = pathCopy.pop();
+        if (set.contains(location)) {
+            error("The path contains loops: the same location was visited before");
+        } else {
+            set.add(location);
         }
     }
     return true;    
@@ -141,6 +147,7 @@ bool readMazeFile(string filename, Grid<bool>& maze)
             }
         }
     }
+
     Stack<GridLocation> solution;
     istringstream istr(lastLine); // Stack read does its own error-checking
     if (istr >> solution) {// if successfully read
@@ -149,10 +156,21 @@ bool readMazeFile(string filename, Grid<bool>& maze)
     return true; // else no solution; nothing more to check
  }
 
+// Helper 1
+Stack<GridLocation> hasNoLoops(Stack<GridLocation>& path) {
+    Set<GridLocation> validSet;
+    Stack<GridLocation> validPath;
+    while(!path.isEmpty()) {
+        GridLocation location = path.pop();
+        if (validSet.contains(location)) {
+            validSet.add(location);
+            validPath.push(location);
+         }
+    }
+    return validPath;
+}
 
-// TODO: Add a function header comment here to explain the
-// behavior of the function and how you implemented this be
-// *******HERE**** TESTS
+// Helper 2
 bool isCorridor(Grid<bool>& g, GridLocation location) {
     if (g[location]) {
         return true;
@@ -160,8 +178,7 @@ bool isCorridor(Grid<bool>& g, GridLocation location) {
     return false;
 }
 
-// TODO: Add a function header comment here to explain the
-// behavior of the function and how you implemented this be
+// Helper 3
 bool isWithinBounds(Grid<bool>& g, GridLocation location) {
     int xBound = g.numRows()-1;
     int yBound = g.numCols()-1;
@@ -173,10 +190,11 @@ bool isWithinBounds(Grid<bool>& g, GridLocation location) {
     return true;
 }
 
-// TODO: Add a function header comment here to explain the 
-// behavior of the function and how you implemented this behavior
+// This function returns a Stack object that represents the
+// path that solves the given Grid representing the maze
 Stack<GridLocation> solveMaze(Grid<bool>& maze)
 {
+    MazeGraphics::drawGrid(maze);
     Stack<GridLocation> p;
     // TODO: your code here
     // 1. Create a queue of paths. A path is a stack of grid locations.
@@ -187,54 +205,110 @@ Stack<GridLocation> solveMaze(Grid<bool>& maze)
     container.enqueue(path);
 
     // 3. Dequeue path from queue.
-    Stack<GridLocation> pathDeq = container.dequeue();
+    Stack<GridLocation> pathDeq = container.peek();
 
-    // 4. If this path ends at exit, this path is the solution!
-    GridLocation exit = {maze.numRows()-1,  maze.numCols()-1};
-    if (pathDeq.peek() == exit) {
-        return pathDeq;
-    } else {
+    while(!container.isEmpty()) {
+        // 4. If this path ends at exit, this path is the solution!
 
-    // 5. a. For each viable neighbor of path end, make copy of path, extend by adding neighbor and enqueue it.
-    //    b. A location has up to four neighbors, one in each of the four cardinal directions. A neighbor location
-    //       is viable if it is within the maze bounds, the cell is an open corridor (not a wall), and it has not
-    //       yet been visit
+        using namespace std::this_thread; // sleep_for, sleep_until
+        using namespace std::chrono; // nanoseconds, system_clock, seconds
+        sleep_for(milliseconds(0));
+        MazeGraphics::highlightPath(pathDeq, "red");
 
-    // 5.1 Get candidates
-        Stack<GridLocation> candidates;
-        GridLocation current = pathDeq.peek();
-        int xCurrent = current.row;
-        int yCurrent = current.col;
-        // Candidates
-        GridLocation up = {xCurrent-1, yCurrent};
-        candidates.push(up);
-        GridLocation right = {xCurrent, yCurrent+1};
-        candidates.push(right);
-        GridLocation down = {xCurrent+1, yCurrent};
-        candidates.push(down);
-        GridLocation left = {xCurrent, yCurrent-1};
-        candidates.push(left);
-    // 5.2 Check bounds
-        Stack<GridLocation> newCandidates;
-        while(!candidates.isEmpty()) {
-            GridLocation location = candidates.pop();
-            if (isWithinBounds(maze, location)) {
-                newCandidates.push(location);
+        GridLocation exit = {maze.numRows()-1,  maze.numCols()-1};
+        if (pathDeq.peek() == exit) {
+            return pathDeq;
+        } else {
+            //container.enqueue(pathDeq);
+        // 5. a. For each viable neighbor of path end, make copy of path, extend by adding neighbor and enqueue it.
+        //    b. A location has up to four neighbors, one in each of the four cardinal directions. A neighbor location
+        //       is viable if it is within the maze bounds, the cell is an open corridor (not a wall), and it has not
+        //       yet been visit
+
+        // 5.1 Get candidates
+            Stack<GridLocation> candidates;
+            GridLocation current = pathDeq.peek();
+            int xCurrent = current.row;
+            int yCurrent = current.col;
+            // Candidates
+            GridLocation up = {xCurrent-1, yCurrent};
+            candidates.push(up);
+            GridLocation right = {xCurrent, yCurrent+1};
+            candidates.push(right);
+            GridLocation down = {xCurrent+1, yCurrent};
+            candidates.push(down);
+            GridLocation left = {xCurrent, yCurrent-1};
+            candidates.push(left);
+        // 5.2 Check bounds
+            Stack<GridLocation> newCandidates;
+            while(!candidates.isEmpty()) {
+                GridLocation location = candidates.pop();
+                if (isWithinBounds(maze, location)) {
+                    newCandidates.push(location);
+                }
             }
+        // 5.3 Check open corridor
+            Stack<GridLocation> corridorCandidates;
+            while(!newCandidates.isEmpty()) {
+                GridLocation location = newCandidates.pop();
+                if (isCorridor(maze, location)) {
+                    corridorCandidates.push(location);
+                }
+            }
+        // 5.4 Check not loop
+
+            Stack<GridLocation> tmp = pathDeq;
+            Set<GridLocation> set;
+            while(!tmp.isEmpty()) {
+                set.add(tmp.pop());
+            }
+            //for each candidate
+            Stack<GridLocation> succes;
+            while(!corridorCandidates.isEmpty()) {
+                GridLocation location = corridorCandidates.pop();
+                if (!set.contains(location)) {
+                    succes.push(location);
+                }
+             }
+
+        // 5.5 Enqueue it if viable
+            container.dequeue(); // old
+            while(!succes.isEmpty()) {
+                GridLocation newStep = succes.pop();
+                Stack<GridLocation> stack = pathDeq;
+                stack.push(newStep);
+                container.enqueue(stack);
+            }
+            pathDeq = container.peek(); //added
         }
-    // 5.3 Check open corridor
-
-    // 5.4 Check not loop
-    // 5.5 Enqueue it if viable
     }
-
-
-
-
     return p;
 }
 
 
+PROVIDED_TEST("solveMaze on file 5x7") {
+    Grid<bool> g;
+    readMazeFile("res/5x7.maze", g);
+    Stack<GridLocation> soln = solveMaze(g);
+
+    EXPECT(checkSolution(g,soln));
+}
+
+PROVIDED_TEST("solveMaze on file 21x35") {
+    Grid<bool> g;
+    readMazeFile("res/21x35.maze", g);
+    Stack<GridLocation> soln = solveMaze(g);
+
+    EXPECT(checkSolution(g,soln));
+}
+
+PROVIDED_TEST("solveMaze on file 33x41") {
+    Grid<bool> g;
+    readMazeFile("res/33x41.maze", g);
+    Stack<GridLocation> soln = solveMaze(g);
+
+    EXPECT(checkSolution(g,soln));
+}
 
 /* * * * * * Student Test Cases For checkSolution* * * * * */
 STUDENT_TEST("is WithinBounds at corner location") {
@@ -264,6 +338,22 @@ STUDENT_TEST("is WithinBounds at center location") {
     EXPECT_EQUAL(true, isWithinBounds(g, down));
     EXPECT_EQUAL(true, isWithinBounds(g, left));
 }
+
+STUDENT_TEST("is the location a Corridor") {
+    Grid<bool> g = {{true, false, true}, {true, true, false}, {false, true, true}};
+    GridLocation loc1 {0,0};
+    GridLocation loc2 {2,0};
+    GridLocation loc3 {2,2};
+    GridLocation loc4 {1,0};
+    GridLocation loc5 {0,1};
+    EXPECT_EQUAL(true, isCorridor(g, loc1));
+    EXPECT_EQUAL(false, isCorridor(g, loc2));
+    EXPECT_EQUAL(true, isCorridor(g, loc3));
+    EXPECT_EQUAL(true, isCorridor(g, loc4));
+    EXPECT_EQUAL(false, isCorridor(g, loc5));
+}
+
+
 /* * * * * * Student Test Cases For checkSolution* * * * * */
 STUDENT_TEST("Raise error: Path must start at the upper left corner") {
     Grid<bool> g = {{true, false}, {true, true}};
@@ -398,18 +488,4 @@ PROVIDED_TEST("checkSolution on invalid path should raise error") {
 }
 
 
-PROVIDED_TEST("solveMaze on file 5x7") {
-    Grid<bool> g;
-    readMazeFile("res/5x7.maze", g);
-    Stack<GridLocation> soln = solveMaze(g);
 
-    EXPECT(checkSolution(g,soln));
-}
-
-PROVIDED_TEST("solveMaze on file 21x35") {
-    Grid<bool> g;
-    readMazeFile("res/21x35.maze", g);
-    Stack<GridLocation> soln = solveMaze(g);
-
-    EXPECT(checkSolution(g,soln));
-}
