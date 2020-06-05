@@ -14,12 +14,77 @@
 #include "search.h"
 using namespace std;
 
+Vector<string> readFile(string fileName) {
+    ifstream in;
+    if (!openFile(in, fileName))
+        error("Cannot open file named " + fileName);
+    Vector<string> lines;
+    readEntireFile(in, lines);
+    return lines;
+}
+
+Map<string, Vector<string>> orderFile(Vector<string> lines) {
+    Map<string, Vector<string>> result;
+    for (int i = 0; i < lines.size(); i++) {
+        if (i % 2 == 0) {
+            Vector<string> v = stringSplit(lines[i+1], " ");
+            for (int i = 0; i < v.size(); i++) {
+                if (v[i].empty()) {
+                    v.remove(i);
+                    i = i - 1;
+                }
+            }
+            result[lines[i]] = v;
+        }
+    }
+    return result;
+}
+
+Vector<string> discardNonWords(Vector<string> v) {
+    Vector<string> result;
+    for(string word : v) {
+        for(int i=0; i < (int)word.length(); i++) {
+            if(isalpha(word[i])) {
+                result.add(word);
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+Vector<string> removePunct(Vector<string> v) {
+    Vector<string> result;
+    for(string word : v) {
+        if (ispunct(word[0])) {
+            word.erase(0, 1);
+        }
+        int lastChar = word.length()-1;
+        if (ispunct(word[lastChar])) {
+            word.erase(lastChar, 1);
+        }
+        result.add(word);
+    }
+    return result;
+}
 // TODO: Add a function header comment here to explain the 
 // behavior of the function and how you implemented this behavior
 Map<string, Set<string>> readDocs(string dbfile)
 {
     Map<string, Set<string>> result;
-    // TODO: your code here
+
+    // 1. Reads file
+    Vector<string> lines = readFile(dbfile);
+
+    // 2. Create map
+    // 2.1 Tokenize contents separated by spaces
+    Map<string, Vector<string>> storage = orderFile(lines);
+    cout << storage << endl;
+    // 2.2 Discard any non-word tokens: wordk-like is a token that
+    // contains at least one letter
+
+    // 2.3 Trim away leading and trailing punctuation marks from each token
+    // 2.4 Check all words should be stored in lowercase format
     return result;
 }
 
@@ -48,6 +113,43 @@ void searchEngine(string dbfile)
     // TODO: your code here
 }
 
+/* * * * * * Student Test Cases * * * * * */
+STUDENT_TEST("readFile") {
+    Vector<string> result = readFile("res/tiny.txt");
+    Vector<string> sln = {"www.shoppinglist.com", "EGGS! milk, fish,      @  bread cheese",
+            "www.rainbow.org", "red ~green~ orange yellow blue indigo violet", "www.dr.seuss.net",
+            "One Fish Two Fish Red fish Blue fish !!!", "www.bigbadwolf.com", "I'm not trying to eat you"};
+    EXPECT_EQUAL(result, sln);
+}
+
+STUDENT_TEST("first order information") {
+    Vector<string> file = {"www.shoppinglist.com", "EGGS! milk, fish,      @  bread cheese",
+            "www.rainbow.org", "red ~green~ orange yellow blue indigo violet"};
+    Map<string, Vector<string>> result = orderFile(file);
+    Map<string, Vector<string>> sln;
+    sln["www.shoppinglist.com"] = {"EGGS!", "milk,", "fish,","@", "bread", "cheese"};
+    sln["www.rainbow.org"] = {"red", "~green~", "orange", "yellow", "blue", "indigo", "violet"};
+    EXPECT_EQUAL(result, sln);
+}
+
+STUDENT_TEST("discard any non-word tokens") {
+    Vector<string> v1 = {"EGGS!", "milk,", "fish,","@", "bread", "cheese"};
+    Vector<string> r1 = discardNonWords(v1);
+    Vector<string> sln1 = {"EGGS!", "milk,", "fish,","bread", "cheese"};
+    EXPECT_EQUAL(r1, sln1);
+
+    Vector<string> v2 = {"1233", "m322", "fish,","@", "bread", "."};
+    Vector<string> r2 = discardNonWords(v2);
+    Vector<string> sln2 = {"m322", "fish,","bread"};
+    EXPECT_EQUAL(r2, sln2);
+}
+
+STUDENT_TEST("check punctuation characters") {
+    Vector<string> v1 = {"EGGS!", "@milk,", "#2fish,","*bread", "che!ese"};
+    Vector<string> r1 = removePunct(v1);
+    Vector<string> sln1 = {"EGGS", "milk", "2fish","bread", "che!ese"};
+    EXPECT_EQUAL(r1, sln1);
+}
 
 /* * * * * * Test Cases * * * * * */
 

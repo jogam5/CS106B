@@ -11,17 +11,17 @@ using namespace std;
 
 int main()
 {
-    //if (runSimpleTests(SELECTED_TESTS)) {
-    if (runSimpleTests(NO_TESTS)) {
+    if (runSimpleTests(SELECTED_TESTS)) {
+    //if (runSimpleTests(NO_TESTS)) {
         return 0;
     }
 
-    Grid<bool> maze;
+    /*Grid<bool> maze;
     if (readMazeFile("res/33x41.maze", maze)) {
         solveMaze(maze);
-    }
+    }*/
 
-    searchEngine("res/website.txt");
+    searchEngine("res/tiny.txt");
 
     cout << "All done, exiting" << endl;
     return 0;

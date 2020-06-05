@@ -295,4 +295,5 @@ DISTFILES += \
     res/errorSize3x3.maze \
     res/errorSize4x4.maze \
     res/malformed_1.maze \
-    res/malformed_2.maze
+    res/malformed_2.maze \
+    res/tiny_simple.txt
