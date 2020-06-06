@@ -67,24 +67,49 @@ Vector<string> removePunct(Vector<string> v) {
     }
     return result;
 }
+
+Vector<string> vToLower(Vector<string> v) {
+    Vector<string> result;
+    for (string s : v) {
+        string str;
+        str = toLowerCase(s);
+        result.add(str);
+    }
+    return result;
+}
+
+Set<string> uniqueSet(Vector<string> v) {
+    Set<string> unique;
+    for(string word : v) {
+        if (!unique.contains(word)) {
+            unique.add(word);
+        }
+    }
+    return unique;
+}
 // TODO: Add a function header comment here to explain the 
 // behavior of the function and how you implemented this behavior
 Map<string, Set<string>> readDocs(string dbfile)
 {
     Map<string, Set<string>> result;
-
     // 1. Reads file
     Vector<string> lines = readFile(dbfile);
-
     // 2. Create map
-    // 2.1 Tokenize contents separated by spaces
+        // 2.1 Tokenize contents separated by spaces
     Map<string, Vector<string>> storage = orderFile(lines);
-    cout << storage << endl;
-    // 2.2 Discard any non-word tokens: wordk-like is a token that
-    // contains at least one letter
+    for(string key : storage.keys()) {
+        Vector<string> v;
+        // 2.2 Discard any non-word tokens: wordk-like is a token that
+        // contains at least one letter
+        v = discardNonWords( storage[key] );
+        // 2.3 Trim away leading and trailing punctuation marks from each token
+        v = removePunct(v);
+        // 2.4 Check all words should be stored in lowercase format
+        v = vToLower(v);
+        // 2.5 Create set of unique values
+        result[key] = uniqueSet(v);
+    }
 
-    // 2.3 Trim away leading and trailing punctuation marks from each token
-    // 2.4 Check all words should be stored in lowercase format
     return result;
 }
 
@@ -151,6 +176,19 @@ STUDENT_TEST("check punctuation characters") {
     EXPECT_EQUAL(r1, sln1);
 }
 
+STUDENT_TEST("string vector to lowercase") {
+    Vector<string> v1 = {"EGGS", "mILk", "2fIsh","breaD", "Che!ese", "abcd"};
+    Vector<string> r1 = vToLower(v1);
+    Vector<string> sln1 = {"eggs", "milk", "2fish","bread", "che!ese", "abcd"};
+    EXPECT_EQUAL(r1, sln1);
+}
+
+STUDENT_TEST("unique set in string Vector") {
+    Vector<string> v1 = {"eggs", "eggs", "milk", "2fish","bread", "abcd", "che!ese", "abcd"};
+    Set<string> r1 = uniqueSet(v1);
+    Set<string> sln1 = {"eggs", "milk", "2fish","bread", "che!ese", "abcd"};
+    EXPECT_EQUAL(r1, sln1);
+}
 /* * * * * * Test Cases * * * * * */
 
 PROVIDED_TEST("readDocs from tiny.txt, contains 4 documents") {
