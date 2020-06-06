@@ -109,7 +109,6 @@ Map<string, Set<string>> readDocs(string dbfile)
         // 2.5 Create set of unique values
         result[key] = uniqueSet(v);
     }
-
     return result;
 }
 
@@ -117,8 +116,30 @@ Map<string, Set<string>> readDocs(string dbfile)
 // behavior of the function and how you implemented this behavior
 Map<string, Set<string>> buildIndex(Map<string, Set<string>>& docs)
 {
+    Map<string, Set<string>> copyDocs = docs;
     Map<string, Set<string>> result;
     // TODO: your code here
+
+    for(string website : docs) {
+        Set<string> words = docs[website];
+
+        // 1. Take one Set of words and loops over each
+        for(string word : words) {
+            Set<string> address;
+
+            // 2. check if the word exists in each Set of the
+            // key:value pair map
+            for (string websiteKey : copyDocs) {
+                Set<string> websiteValue = copyDocs[websiteKey];
+                // 3. If the word exists, store the website
+                if(websiteValue.contains(word)) {
+                    address.add(websiteKey);
+                }
+            }
+            result[word] = address;
+        }
+
+    }
     return result;
 }
 
@@ -211,6 +232,41 @@ PROVIDED_TEST("buildIndex from tiny.txt, 20 unique tokens overall") {
     EXPECT(index.containsKey("fish"));
     EXPECT(!index.containsKey("@"));
 }
+
+STUDENT_TEST("complete tiny.txt") {
+    Map<string, Set<string>> doc;
+    doc["www.bigbadwolf.com"] = {"eat", "i'm", "not", "to", "trying", "you"};
+    doc["www.dr.seuss.net"] = { "blue", "fish", "one", "red", "two"};
+    doc["www.rainbow.org"] = { "blue", "green", "indigo", "orange", "red", "violet", "yellow"};
+    doc["www.shoppinglist.com"] = { "bread", "cheese", "eggs", "fish", "milk"};
+    Map<string, Set<string>> index = buildIndex(doc);
+
+    Map<string, Set<string>> sln;
+    sln["eat"] = {"www.bigbadwolf.com"};
+    sln["i'm"] = {"www.bigbadwolf.com"};
+    sln["not"] = {"www.bigbadwolf.com"};
+    sln["to"] = {"www.bigbadwolf.com"};
+    sln["trying"] = {"www.bigbadwolf.com"};
+    sln["you"] = {"www.bigbadwolf.com"};
+    sln["blue"] = {"www.dr.seuss.net",  "www.rainbow.org"};
+    sln["red"] = {"www.dr.seuss.net",  "www.rainbow.org"};
+    sln["fish"] = {"www.dr.seuss.net",  "www.shoppinglist.com"};
+    sln["one"] = {"www.dr.seuss.net"};
+    sln["two"] = {"www.dr.seuss.net"};
+    sln["green"] = {"www.rainbow.org"};
+    sln["indigo"] = {"www.rainbow.org"};
+    sln["orange"] = {"www.rainbow.org"};
+    sln["violet"] = {"www.rainbow.org"};
+    sln["yellow"] = {"www.rainbow.org"};
+    sln["bread"] = {"www.shoppinglist.com"};
+    sln["cheese"] = {"www.shoppinglist.com"};
+    sln["eggs"] = {"www.shoppinglist.com"};
+    sln["milk"] = {"www.shoppinglist.com"};
+
+    EXPECT_EQUAL(sln, index);
+
+}
+
 
 PROVIDED_TEST("findQueryMatches from tiny.txt, single word query") {
     Map<string, Set<string>> docs = readDocs("res/tiny.txt");
