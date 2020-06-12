@@ -14,6 +14,8 @@
 #include "search.h"
 using namespace std;
 
+// readDocs() and buildIndex() helpers
+
 Vector<string> readFile(string fileName) {
     ifstream in;
     if (!openFile(in, fileName))
@@ -87,6 +89,80 @@ Set<string> uniqueSet(Vector<string> v) {
     }
     return unique;
 }
+
+// findQueryMatches() helpers
+
+Vector<string> removePunctuationExceptModifiers(Vector<string> v) {
+    Vector<string> result;
+    for(string word : v) {
+        if( word[0] == '+' || word[0] == '-') {
+        } else {
+            if (ispunct(word[0])) {
+                word.erase(0, 1);
+            }
+        }
+        int lastChar = word.length()-1;
+        if (ispunct(word[lastChar])) {
+            word.erase(lastChar, 1);
+        }
+        result.add(word);
+    }
+    return result;
+}
+
+Vector<string> breakSentence(string sentence) {
+    Vector<string> v = stringSplit(sentence, " ");
+    for (int i = 0; i < v.size(); i++) {
+        if (v[i].empty()) {
+            v.remove(i);
+            i = i - 1;
+        }
+    }
+    v = discardNonWords(v);
+    v = removePunctuationExceptModifiers(v);
+    v = vToLower(v);
+    return v;
+}
+
+Set<string> singleQuery(Map<string, Set<string>>& index, string term) {
+    Set<string> websites;
+    if(index.containsKey(term)) {
+        websites = index[term];
+    }
+    return websites;
+}
+
+Set<string> doubleQuery(Set<string> setA, Set<string> setB, string sign) {
+    Set<string> result;
+    if(sign == "+") { // AND
+        result = setA*setB;
+    } else if (sign == "-") {
+        result = setA -= setB; // REMOVE
+    } else {
+        result = setA + setB; // UNION
+    }
+    return result;
+}
+
+// Insight: we need a function that receives two sets and return one as a result,
+// The function should differentiate between none, + or -
+// Probably the function can be run over a loop
+Set<string> compoundQuery(Map<string, Set<string>>& index, Vector<string> terms) {
+    Set<string> result;
+    Set<string> setA = index[ terms[0] ];
+    for(int i=1; i < terms.size(); i++) {
+        string sign = "";
+        if (terms[i][0] == '+' || terms[i][0] == '-') {
+            sign = terms[i][0];
+            terms[i].erase(0, 1);
+        }
+        Set<string> setB = index[ terms[i] ];
+        setA = doubleQuery(setA, setB, sign);
+    }
+    result = setA;
+    return result;
+}
+
 // TODO: Add a function header comment here to explain the 
 // behavior of the function and how you implemented this behavior
 Map<string, Set<string>> readDocs(string dbfile)
@@ -148,7 +224,15 @@ Map<string, Set<string>> buildIndex(Map<string, Set<string>>& docs)
 Set<string> findQueryMatches(Map<string, Set<string>>& index, string sentence)
 {
     Set<string> result;
-    // TODO: your code here
+    // 0. Strip punctuation and break sentence
+    Vector<string> terms = breakSentence(sentence);
+    if (terms.size() == 1) {
+        // 1. Single query: search for one term only
+        result = singleQuery(index, terms[0]);
+    } else if (terms.size() > 1) {
+        // 2. Compund query: search for more than one term
+        result = compoundQuery(index, terms);
+    }
     return result;
 }
 
@@ -267,6 +351,117 @@ STUDENT_TEST("complete tiny.txt") {
 
 }
 
+STUDENT_TEST("break sentence before query") {
+    string sentence = "quokka@";
+    Vector<string> result = breakSentence(sentence);
+    Vector<string> sln = {"quokka"};
+    EXPECT_EQUAL(result, sln);
+
+    sentence = "simple cheap #";
+    result = breakSentence(sentence);
+    sln = {"simple", "cheap"};
+    EXPECT_EQUAL(result, sln);
+
+    sentence = "simple# cheap";
+    result = breakSentence(sentence);
+    sln = {"simple", "cheap"};
+    EXPECT_EQUAL(result, sln);
+
+    sentence = "@ #";
+    result = breakSentence(sentence);
+    sln = {};
+    EXPECT_EQUAL(result, sln);
+
+    sentence = "#simple ? cheap. $ algo";
+    result = breakSentence(sentence);
+    sln = {"simple", "cheap", "algo"};
+    EXPECT_EQUAL(result, sln);
+
+    sentence = "   #simple ?      cheap. $  .     algo";
+    result = breakSentence(sentence);
+    sln = {"simple", "cheap", "algo"};
+    EXPECT_EQUAL(result, sln);
+
+    sentence = "simple cheap algo";
+    result = breakSentence(sentence);
+    sln = {"simple", "cheap", "algo"};
+    EXPECT_EQUAL(result, sln);
+
+    sentence = "simple +cheap pyramid -algo";
+    result = breakSentence(sentence);
+    sln = {"simple", "+cheap", "pyramid", "-algo"};
+    EXPECT_EQUAL(result, sln);
+
+    sentence = "simple +cheap pyramid-algo";
+    result = breakSentence(sentence);
+    sln = {"simple", "+cheap", "pyramid-algo"};
+    EXPECT_EQUAL(result, sln);
+
+}
+
+STUDENT_TEST("TEST SINGLE query") {
+    Map<string, Set<string>> docs = readDocs("res/tiny.txt");
+    Map<string, Set<string>> index = buildIndex(docs);
+    Set<string> result = singleQuery(index, "red");
+    Set<string> sln = {"www.dr.seuss.net",  "www.rainbow.org"};
+    EXPECT_EQUAL(result, sln);
+
+    result = singleQuery(index, "green");
+    sln = {"www.rainbow.org"};
+    EXPECT_EQUAL(result, sln);
+
+    result = singleQuery(index, "cow");
+    sln = {};
+    EXPECT_EQUAL(result, sln);
+}
+
+STUDENT_TEST("test UNION query") {
+    Set<string> setA = {"seuss.net", "rain.com"};
+    Set<string> setB = {"seuss.net", "shopping.com"};
+    Set<string> result = doubleQuery(setA, setB, "");
+    Set<string> sln = {"seuss.net", "rain.com", "shopping.com"};
+    EXPECT_EQUAL(result, sln);
+}
+
+STUDENT_TEST("test AND query") {
+    Set<string> setA = {"seuss.net", "rain.com"};
+    Set<string> setB = {"seuss.net", "shopping.com"};
+    Set<string> result = doubleQuery(setA, setB, "+");
+    Set<string> sln = {"seuss.net"};
+    EXPECT_EQUAL(result, sln);
+}
+
+STUDENT_TEST("test REMOVE query") {
+    Set<string> setA = {"seuss.net", "rain.com"};
+    Set<string> setB = {"seuss.net", "shopping.com"};
+    Set<string> result = doubleQuery(setA, setB, "-");
+    Set<string> sln = {"rain.com"};
+    EXPECT_EQUAL(result, sln);
+}
+
+STUDENT_TEST("test process UNION query") {
+    Map<string, Set<string>> docs = readDocs("res/tiny.txt");
+    Map<string, Set<string>> index = buildIndex(docs);
+    Set<string> result = compoundQuery(index, {"you", "red", "fish"});
+    Set<string> sln = {"www.bigbadwolf.com", "www.dr.seuss.net", "www.rainbow.org", "www.shoppinglist.com"};
+    EXPECT_EQUAL(result, sln);
+}
+
+STUDENT_TEST("test process AND query") {
+    Map<string, Set<string>> docs = readDocs("res/tiny.txt");
+    Map<string, Set<string>> index = buildIndex(docs);
+    Set<string> result = compoundQuery(index, {"red", "+fish"});
+    Set<string> sln = {"www.dr.seuss.net"};
+    EXPECT_EQUAL(result, sln);
+}
+
+STUDENT_TEST("test process REMOVE query") {
+    Map<string, Set<string>> docs = readDocs("res/tiny.txt");
+    Map<string, Set<string>> index = buildIndex(docs);
+    Set<string> result = compoundQuery(index, {"red", "-fish"});
+    Set<string> sln = {"www.rainbow.org"};
+    EXPECT_EQUAL(result, sln);
+}
 
 PROVIDED_TEST("findQueryMatches from tiny.txt, single word query") {
     Map<string, Set<string>> docs = readDocs("res/tiny.txt");

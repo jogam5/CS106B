@@ -41,5 +41,5 @@ In total I created ten different tests.
 Search Engine
 -------------
 Q8: What would the sample inverted index for the tiny.txt file look like?
-A8: TODO
-
+A8:
+{"blue":{"www.dr.seuss.net", "www.rainbow.org"}, "bread":{"www.shoppinglist.com"}, "cheese":{"www.shoppinglist.com"}, "eat":{"www.bigbadwolf.com"}, "eggs":{"www.shoppinglist.com"}, "fish":{"www.dr.seuss.net", "www.shoppinglist.com"}, "green":{"www.rainbow.org"}, "i'm":{"www.bigbadwolf.com"}, "indigo":{"www.rainbow.org"}, "milk":{"www.shoppinglist.com"}, "not":{"www.bigbadwolf.com"}, "one":{"www.dr.seuss.net"}, "orange":{"www.rainbow.org"}, "red":{"www.dr.seuss.net", "www.rainbow.org"}, "to":{"www.bigbadwolf.com"}, "trying":{"www.bigbadwolf.com"}, "two":{"www.dr.seuss.net"}, "violet":{"www.rainbow.org"}, "yellow":{"www.rainbow.org"}, "you":{"www.bigbadwolf.com"}}
