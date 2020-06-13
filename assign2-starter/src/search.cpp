@@ -197,6 +197,7 @@ Map<string, Set<string>> buildIndex(Map<string, Set<string>>& docs)
     // TODO: your code here
 
     for(string website : docs) {
+        cout << website << endl;
         Set<string> words = docs[website];
 
         // 1. Take one Set of words and loops over each
@@ -240,8 +241,30 @@ Set<string> findQueryMatches(Map<string, Set<string>>& index, string sentence)
 // behavior of the function and how you implemented this behavior
 void searchEngine(string dbfile)
 {
-    // TODO: your code here
-}
+    //1. Construct inverted index
+    Map<string, Set<string>> docs = readDocs(dbfile);
+    cout << "Stand by while building index..." << endl;
+    Map<string, Set<string>> index = buildIndex(docs);
+
+    //2. Display to the user how many website URLs were processed to build
+    // the index and how many distinct words were found across all website content
+    cout << "Indexed " << docs.size() << " pages containing " << index.keys().size() << " unique terms." << endl;
+
+    //3. Loop over queries
+    //cout << "Enter query sentence (ENTER "" to quit): ";
+    string line = getLine("Enter query sentence (ENTER/RETURN to quit): ");
+    while (line != "") {
+        Set<string> result = findQueryMatches(index, line);
+        cout << "Found " << result.size() << " matching pages" << endl;
+        cout << result << endl;
+        line = getLine("Enter query sentence (ENTER/RETURN to quit): ");
+    }
+
+    // To do:
+    // Check punctuation
+    // Check efficiency of buildIndex
+
+ }
 
 /* * * * * * Student Test Cases * * * * * */
 STUDENT_TEST("readFile") {

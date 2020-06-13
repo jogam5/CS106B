@@ -11,8 +11,8 @@ using namespace std;
 
 int main()
 {
-    if (runSimpleTests(SELECTED_TESTS)) {
-    //if (runSimpleTests(NO_TESTS)) {
+    //if (runSimpleTests(SELECTED_TESTS)) {
+    if (runSimpleTests(NO_TESTS)) {
         return 0;
     }
 
@@ -21,7 +21,7 @@ int main()
         solveMaze(maze);
     }*/
 
-    searchEngine("res/tiny.txt");
+    searchEngine("res/website.txt");
 
     cout << "All done, exiting" << endl;
     return 0;
