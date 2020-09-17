@@ -14,20 +14,44 @@ bool isBalanced(string str) {
     return checkOperators(ops);
 }
 
-// TODO: Add a function header comment here to explain the
-// behavior of the function and how you implemented this behavior
+/**
+ * This function receives a string and erases all its characters except
+ * the operators: (), [] and {}
+ */
 string operatorsOnly(string s)
 {
-    // TODO your code here
-    return s;
+    int d = s.length();
+    if ( s.empty() ) {
+        return "";
+    }
+    if (s[d-1] == '[' || s[d-1] == ']' || s[d-1] ==  '(' || s[d-1] == ')' || s[d-1] == '{' || s[d-1] == '}' ) {
+        return operatorsOnly(s.erase(d-1,1)) += s[d-1];
+    } else {
+        return operatorsOnly(s.erase(d-1,1));
+    }
+    return "";
 }
 
-// TODO: Add a function header comment here to explain the
-// behavior of the function and how you implemented this behavior
+/**
+ * This function receives a string of operators and returns true if the
+ * operators are balanced.
+ */
 bool checkOperators(string s)
 {
-    // TODO your code here
-    return false;
+    if (s.empty()) {
+        return true;
+    } else if (s.find("()") != string::npos) {
+        size_t pos = s.find("()");
+        return checkOperators(s.erase(pos,2));
+    } else if (s.find("[]") != string::npos) {
+        size_t pos = s.find("[]");
+        return checkOperators(s.erase(pos,2));
+    } else if (s.find("{}") != string::npos) {
+        size_t pos = s.find("{}");
+        return checkOperators(s.erase(pos,2));
+    } else {
+        return false;
+    }
 }
 
 
