@@ -21,13 +21,19 @@ Vector<string> readFile(string fileName) {
     if (!openFile(in, fileName))
         error("Cannot open file named " + fileName);
     Vector<string> lines;
+    // readEntireFile is a function from Stanford library
+    // insight: it's very useful for further manipulation to
+    // return the lines as a vector
     readEntireFile(in, lines);
     return lines;
 }
 
+// *** Pattern: even and odds lines
 Map<string, Vector<string>> orderFile(Vector<string> lines) {
     Map<string, Vector<string>> result;
     for (int i = 0; i < lines.size(); i++) {
+        // if true, the "even lines" (0, 2, 4, etc) will become a key
+        // and the "odd lines" (1, 3, 5) will be splitted to become the values
         if (i % 2 == 0) {
             Vector<string> v = stringSplit(lines[i+1], " ");
             for (int i = 0; i < v.size(); i++) {
@@ -168,7 +174,7 @@ Set<string> compoundQuery(Map<string, Set<string>>& index, Vector<string> terms)
 Map<string, Set<string>> readDocs(string dbfile)
 {
     Map<string, Set<string>> result;
-    // 1. Reads file
+    // 1. Read file
     Vector<string> lines = readFile(dbfile);
     // 2. Create map
         // 2.1 Tokenize contents separated by spaces

@@ -52,18 +52,11 @@ int binarySearch(vector<int> v, int low, int high, int search) {
       //recursive decomposition
       cout << "search < guess" << endl;
       high = guess-1;
-      //cout << "new vector: ";
-      //vector<int> newVector = slicing(v, low, high);
-      //for (auto i: newVector)
-      //  cout << i << ' ';
-      //  cout << endl;
       return binarySearch(v, low, high, search);
   } else {
       // search > guess
       cout << "search > guess" << endl;
       low = guess+1;
-      //cout << "new vector: ";
-      //vector<int> newVector = slicing(v, low, high);
       return binarySearch(v, low, high, search);
   }
 }

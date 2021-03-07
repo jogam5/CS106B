@@ -196,7 +196,6 @@ Stack<GridLocation> solveMaze(Grid<bool>& maze)
 {
     MazeGraphics::drawGrid(maze);
     Stack<GridLocation> p;
-    // TODO: your code here
     // 1. Create a queue of paths. A path is a stack of grid locations.
     Queue<Stack<GridLocation>> container;
 
@@ -208,18 +207,22 @@ Stack<GridLocation> solveMaze(Grid<bool>& maze)
     Stack<GridLocation> pathDeq = container.peek();
 
     while(!container.isEmpty()) {
-        // 4. If this path ends at exit, this path is the solution!
 
+        // Begin <-
+        //  This code helps reduce the speed of execution of the
+        //  code, so that it can be highlighted in the animation:
         using namespace std::this_thread; // sleep_for, sleep_until
         using namespace std::chrono; // nanoseconds, system_clock, seconds
-        sleep_for(milliseconds(0));
+        sleep_for(milliseconds(1));
         MazeGraphics::highlightPath(pathDeq, "red");
+        // -> End
 
+        // 4. If this path ends at exit, this path is the solution!
         GridLocation exit = {maze.numRows()-1,  maze.numCols()-1};
         if (pathDeq.peek() == exit) {
             return pathDeq;
         } else {
-            //container.enqueue(pathDeq);
+
         // 5. a. For each viable neighbor of path end, make copy of path, extend by adding neighbor and enqueue it.
         //    b. A location has up to four neighbors, one in each of the four cardinal directions. A neighbor location
         //       is viable if it is within the maze bounds, the cell is an open corridor (not a wall), and it has not
@@ -230,7 +233,10 @@ Stack<GridLocation> solveMaze(Grid<bool>& maze)
             GridLocation current = pathDeq.peek();
             int xCurrent = current.row;
             int yCurrent = current.col;
-            // Candidates
+            // "Candidates" means each cardinal point
+            // that could be a potential valid route.
+            // The validity of each candidate will be
+            // evaluated using each filter
             GridLocation up = {xCurrent-1, yCurrent};
             candidates.push(up);
             GridLocation right = {xCurrent, yCurrent+1};
@@ -258,7 +264,7 @@ Stack<GridLocation> solveMaze(Grid<bool>& maze)
         // 5.4 Check not loop
 
             Stack<GridLocation> tmp = pathDeq;
-            Set<GridLocation> set;
+            Set<GridLocation> set; // "set" variable contains the "history" of the path
             while(!tmp.isEmpty()) {
                 set.add(tmp.pop());
             }
@@ -266,12 +272,14 @@ Stack<GridLocation> solveMaze(Grid<bool>& maze)
             Stack<GridLocation> succes;
             while(!corridorCandidates.isEmpty()) {
                 GridLocation location = corridorCandidates.pop();
+                // If the candidate is not in the "history" of the path,
+                // we add the candidate.
                 if (!set.contains(location)) {
                     succes.push(location);
                 }
              }
 
-        // 5.5 Enqueue it if viable
+        // 5.5 Simply enqueue it if viable
             container.dequeue(); // old
             while(!succes.isEmpty()) {
                 GridLocation newStep = succes.pop();

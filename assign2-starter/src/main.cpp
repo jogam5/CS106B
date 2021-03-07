@@ -16,12 +16,12 @@ int main()
         return 0;
     }
 
-    /*Grid<bool> maze;
+    Grid<bool> maze;
     if (readMazeFile("res/33x41.maze", maze)) {
         solveMaze(maze);
-    }*/
+    }
 
-    searchEngine("res/website.txt");
+    //searchEngine("res/website.txt");
 
     cout << "All done, exiting" << endl;
     return 0;
